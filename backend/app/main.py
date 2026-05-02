@@ -149,7 +149,7 @@ async def get_analysis(game_id: int, user: User = Depends(get_current_user), db:
             .order_by(Move.move_number)
         )
     )
-    summary = {"inaccuracy": 0, "mistake": 0, "blunder": 0}
+    summary = {"inaccuracy": 0, "mistake": 0, "miss": 0, "blunder": 0}
     for mistake in mistakes:
         summary[mistake.type] = summary.get(mistake.type, 0) + 1
     return AnalysisRead(game=game, moves=moves, mistakes=mistakes, summary=summary)

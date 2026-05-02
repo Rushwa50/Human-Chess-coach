@@ -20,7 +20,7 @@ export type Move = {
 export type Mistake = {
   id: number;
   move_id: number;
-  type: "inaccuracy" | "mistake" | "blunder";
+  type: "brilliant" | "great" | "best" | "excellent" | "good" | "book" | "inaccuracy" | "mistake" | "miss" | "blunder";
   explanation: string;
   created_at: string;
   move?: Move | null;

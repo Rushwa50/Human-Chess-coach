@@ -15,29 +15,47 @@ const mistakeColors = {
   blunder: "bg-red-100 text-red-800"
 };
 
-type MoveStatus = "excellent" | "normal" | "inaccuracy" | "mistake" | "blunder";
+type MoveStatus = "brilliant" | "great" | "best" | "excellent" | "good" | "book" | "normal" | "inaccuracy" | "mistake" | "miss" | "blunder";
 
 const statusLabels: Record<MoveStatus, string> = {
+  brilliant: "Brilliant",
+  great: "Great",
+  best: "Best",
   excellent: "Excellent",
+  good: "Good",
+  book: "Book",
   normal: "Normal",
   inaccuracy: "Inaccuracy",
   mistake: "Mistake",
+  miss: "Miss",
   blunder: "Blunder"
 };
 
 const statusBadgeColors: Record<MoveStatus, string> = {
+  brilliant: "bg-cyan-100 text-cyan-800",
+  great: "bg-blue-100 text-blue-800",
+  best: "bg-green-100 text-green-800",
   excellent: "bg-moss/15 text-green-800",
-  normal: "bg-blue-100 text-blue-800",
+  good: "bg-teal-100 text-teal-800",
+  book: "bg-amber-100 text-amber-800",
+  normal: "bg-gray-100 text-gray-800",
   inaccuracy: "bg-yellow-100 text-yellow-800",
   mistake: "bg-orange-100 text-orange-800",
+  miss: "bg-rose-100 text-rose-800",
   blunder: "bg-red-100 text-red-800"
 };
 
 const statusArrowColors: Record<MoveStatus, string> = {
+  brilliant: "rgba(6, 182, 212, 0.9)",
+  great: "rgba(59, 130, 246, 0.9)",
+  best: "rgba(34, 197, 94, 0.9)",
   excellent: "rgba(34, 139, 74, 0.9)",
-  normal: "rgba(37, 99, 235, 0.85)",
-  inaccuracy: "rgba(217, 119, 6, 0.85)",
+  good: "rgba(20, 184, 166, 0.9)",
+  book: "rgba(217, 119, 6, 0.9)",
+  normal: "rgba(107, 114, 128, 0.85)",
+  inaccuracy: "rgba(234, 179, 8, 0.85)",
   mistake: "rgba(234, 88, 12, 0.85)",
+  miss: "rgba(225, 29, 72, 0.85)",
   blunder: "rgba(220, 38, 38, 0.85)"
 };
 
@@ -88,9 +106,59 @@ function sameMove(first: string | null | undefined, second: string | null | unde
   return Boolean(first && second && first.slice(0, 4) === second.slice(0, 4));
 }
 
+function winProbability(evalPawns: number): number {
+  const capped = Math.max(-100, Math.min(100, evalPawns));
+  return 1 / (1 + Math.exp(-0.368208 * capped));
+}
+
+const pieceValues: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+
+function isSacrifice(fen: string, uciMove: string | null | undefined): boolean {
+  if (!uciMove || uciMove.length < 4) return false;
+  try {
+    const chess = new Chess(fen);
+    const from = uciMove.slice(0, 2) as Square;
+    const to = uciMove.slice(2, 4) as Square;
+    const piece = chess.get(from);
+    if (!piece || piece.type === 'p' || piece.type === 'k') return false;
+    
+    const oppColor = piece.color === 'w' ? 'b' : 'w';
+    const targetPiece = chess.get(to);
+    
+    chess.move({ from, to, promotion: uciMove.slice(4, 5) || undefined });
+    
+    if (chess.isAttacked(to, oppColor)) {
+       if (targetPiece && pieceValues[targetPiece.type] >= pieceValues[piece.type]) {
+           return false;
+       }
+       return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 function getStoredMoveStatus(move: Move, mistake?: Mistake): MoveStatus {
   if (mistake) return mistake.type;
-  if (isEngineMatch(move)) return "excellent";
+
+  if (move.move_number <= 10) return "book";
+
+  const wpBefore = winProbability(move.eval_before ?? 0);
+  const wpAfter = winProbability(move.eval_after ?? 0);
+  const wpDrop = wpBefore - wpAfter;
+
+  if (isEngineMatch(move)) {
+    if (isSacrifice(move.fen, move.played_move)) {
+      return "brilliant";
+    }
+    if (move.eval_after && winProbability(move.eval_after) > 0.7) return "great";
+    return "best";
+  }
+  
+  if (wpDrop <= 0.02) return "excellent";
+  if (wpDrop <= 0.05) return "good";
+
   return "normal";
 }
 
@@ -130,6 +198,17 @@ export default function AnalysisPage() {
     return map;
   }, [analysis]);
 
+  const computedSummary = useMemo(() => {
+    if (!analysis) return {};
+    const summary: Record<string, number> = {};
+    analysis.moves.forEach((move) => {
+      const mistake = mistakeByMove.get(move.id);
+      const status = getStoredMoveStatus(move, mistake);
+      summary[status] = (summary[status] ?? 0) + 1;
+    });
+    return summary;
+  }, [analysis, mistakeByMove]);
+
   const selectedMove = analysis?.moves.find((move) => move.id === selectedMoveId) ?? null;
   const selectedMistake = selectedMove ? mistakeByMove.get(selectedMove.id) : analysis?.mistakes[0];
   const boardPosition = selectedMove?.fen ?? "start";
@@ -137,7 +216,7 @@ export default function AnalysisPage() {
   const bestDetails = selectedMove ? describeMove(selectedMove.fen, selectedMove.best_move) : null;
   const triedDetails = selectedMove && triedMove ? describeMove(selectedMove.fen, triedMove.uci) : null;
   const isExcellentMove = selectedMove ? isEngineMatch(selectedMove) : false;
-  const selectedStatus: MoveStatus = selectedMistake?.type ?? (isExcellentMove ? "excellent" : "normal");
+  const selectedStatus: MoveStatus = selectedMove ? getStoredMoveStatus(selectedMove, selectedMistake) : "normal";
   const visibleStatus = triedMove?.status ?? selectedStatus;
   const moveArrows: Arrow[] = useMemo(() => {
     const arrows: Arrow[] = [];
@@ -155,14 +234,18 @@ export default function AnalysisPage() {
 
   const coachIntro = useMemo(() => {
     if (!selectedMove) return "";
-    if (isExcellentMove && playedDetails) {
-      return `Excellent move: move the ${playedDetails.side.toLowerCase()} ${playedDetails.pieceName} from ${playedDetails.from} to ${playedDetails.to}.`;
+    
+    const positiveStatuses = ["brilliant", "great", "best", "excellent", "good", "book", "normal"];
+    if (positiveStatuses.includes(selectedStatus) && playedDetails) {
+      const statusText = statusLabels[selectedStatus] || "Normal";
+      return `${statusText} move: move the ${playedDetails.side.toLowerCase()} ${playedDetails.pieceName} from ${playedDetails.from} to ${playedDetails.to}.`;
     }
+
     if (bestDetails) {
       return `Best move: move the ${bestDetails.side.toLowerCase()} ${bestDetails.pieceName} from ${bestDetails.from} to ${bestDetails.to}.`;
     }
     return "The engine did not return a clear best move for this position.";
-  }, [bestDetails, isExcellentMove, playedDetails, selectedMove]);
+  }, [bestDetails, playedDetails, selectedMove, selectedStatus]);
 
   const voiceText = [coachIntro, selectedMistake?.explanation].filter(Boolean).join(" ");
 
@@ -286,11 +369,11 @@ export default function AnalysisPage() {
         </button>
       </div>
 
-      <div className="mb-5 grid grid-cols-3 gap-3">
-        {(["inaccuracy", "mistake", "blunder"] as const).map((type) => (
+      <div className="mb-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+        {(["brilliant", "great", "best", "miss", "mistake", "blunder"] as const).map((type) => (
           <div key={type} className="rounded-lg border border-black/10 bg-white p-4">
-            <p className="text-2xl font-semibold">{analysis.summary[type] ?? 0}</p>
-            <p className="text-sm capitalize text-black/60">{type}</p>
+            <p className="text-2xl font-semibold">{computedSummary[type] ?? 0}</p>
+            <p className="text-sm capitalize text-black/60">{statusLabels[type]}</p>
           </div>
         ))}
       </div>

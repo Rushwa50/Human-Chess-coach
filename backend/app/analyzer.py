@@ -1,5 +1,6 @@
 import asyncio
 import io
+import math
 from dataclasses import dataclass
 
 import chess.pgn
@@ -12,12 +13,22 @@ from app.engine import StockfishSession
 from app.models import Game, Mistake, Move
 
 
-def classify_mistake(eval_drop: float) -> str | None:
-    if eval_drop > 3.0:
+def win_probability(eval_pawns: float) -> float:
+    capped_eval = max(-100.0, min(100.0, eval_pawns))
+    return 1 / (1 + math.exp(-0.368208 * capped_eval))
+
+def classify_mistake(eval_drop: float, eval_before: float, eval_after: float) -> str | None:
+    wp_before = win_probability(eval_before)
+    wp_after = win_probability(eval_after)
+    wp_drop = wp_before - wp_after
+    
+    if wp_drop >= 0.20:
+        if wp_before > 0.70 and wp_after < 0.50:
+            return "miss"
         return "blunder"
-    if eval_drop > 1.5:
+    if wp_drop >= 0.10:
         return "mistake"
-    if eval_drop > 0.5:
+    if wp_drop >= 0.05:
         return "inaccuracy"
     return None
 
@@ -93,7 +104,7 @@ async def analyze_game(game_id: int, db: AsyncSession) -> None:
             db.add(move_row)
             await db.flush()
 
-            mistake_type = classify_mistake(computed.eval_drop)
+            mistake_type = classify_mistake(computed.eval_drop, computed.eval_before, computed.eval_after)
             if mistake_type:
                 explanation = await explain_mistake(
                     computed.fen,
