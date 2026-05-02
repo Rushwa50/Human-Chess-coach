@@ -1,0 +1,16 @@
+.env
+.venv/
+venv/
+backend/.packages/
+backend/.packages_fresh/
+__pycache__/
+*.py[cod]
+*.db
+
+node_modules/
+dist/
+.vite/
+tools/
+
+.DS_Store
+Thumbs.db
