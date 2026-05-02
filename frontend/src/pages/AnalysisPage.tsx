@@ -1,5 +1,5 @@
 import { Chess } from "chess.js";
-import { RefreshCw, Volume2, VolumeX } from "lucide-react";
+import { ArrowRight, RefreshCw, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import type { Arrow, Square } from "react-chessboard/dist/chessboard/types";
@@ -13,6 +13,21 @@ const mistakeColors = {
   inaccuracy: "bg-gold/15 text-yellow-800",
   mistake: "bg-clay/15 text-orange-800",
   blunder: "bg-red-100 text-red-800"
+};
+
+const pieceImageUrls: Record<string, string> = {
+  wk: "https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg",
+  wq: "https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg",
+  wr: "https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg",
+  wb: "https://upload.wikimedia.org/wikipedia/commons/b/b1/Chess_blt45.svg",
+  wn: "https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg",
+  wp: "https://upload.wikimedia.org/wikipedia/commons/4/45/Chess_plt45.svg",
+  bk: "https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg",
+  bq: "https://upload.wikimedia.org/wikipedia/commons/4/47/Chess_qdt45.svg",
+  br: "https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg",
+  bb: "https://upload.wikimedia.org/wikipedia/commons/9/98/Chess_bdt45.svg",
+  bn: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_ndt45.svg",
+  bp: "https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg",
 };
 
 type MoveStatus = "brilliant" | "great" | "best" | "excellent" | "good" | "book" | "normal" | "inaccuracy" | "mistake" | "miss" | "blunder";
@@ -92,9 +107,9 @@ function describeMove(fen: string, uciMove: string | null | undefined) {
 
   try {
     const san = chess.move(squares)?.san;
-    return { ...squares, pieceName, side, san: san ?? uciMove };
+    return { ...squares, pieceName, side, pieceType: piece?.type, pieceColor: piece?.color, san: san ?? uciMove };
   } catch {
-    return { ...squares, pieceName, side, san: uciMove ?? "" };
+    return { ...squares, pieceName, side, pieceType: piece?.type, pieceColor: piece?.color, san: uciMove ?? "" };
   }
 }
 
@@ -420,6 +435,8 @@ export default function AnalysisPage() {
                 const mistake = mistakeByMove.get(move.id);
                 const selected = selectedMoveId === move.id;
                 const status = getStoredMoveStatus(move, mistake);
+                const moveDetails = describeMove(move.fen, move.played_move);
+                
                 return (
                   <button
                     key={move.id}
@@ -429,8 +446,27 @@ export default function AnalysisPage() {
                       selected ? "bg-ink text-white" : "hover:bg-field"
                     }`}
                   >
-                    <span>
-                      {move.move_number}. {move.played_move}
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <span className="w-5 text-right opacity-60">{move.move_number}.</span>
+                      {moveDetails && moveDetails.pieceType && moveDetails.pieceColor ? (
+                        <>
+                          <img 
+                            src={pieceImageUrls[`${moveDetails.pieceColor}${moveDetails.pieceType}`]} 
+                            alt={moveDetails.pieceName}
+                            className="h-5 w-5 drop-shadow-sm"
+                          />
+                          <span>{moveDetails.from}</span>
+                          <ArrowRight size={14} className={selected ? "text-white/60" : "text-black/40"} />
+                          <span>{moveDetails.to}</span>
+                          {moveDetails.promotion && (
+                            <span className={`text-xs font-bold ${selected ? "text-white/90" : "text-blue-500"}`}>
+                              ={moveDetails.promotion.toUpperCase()}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span>{move.played_move}</span>
+                      )}
                     </span>
                     <span className={`rounded px-2 py-0.5 text-xs ${selected ? "bg-white/20 text-white" : statusBadgeColors[status]}`}>
                       {statusLabels[status]}
