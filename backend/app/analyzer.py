@@ -51,13 +51,23 @@ def compute_game_analysis(pgn: str) -> list[ComputedMove]:
 
     rows: list[ComputedMove] = []
     board = parsed_game.board()
+    
     with StockfishSession() as engine:
+        # Initial evaluation of the starting position
+        current_best_move, current_eval = engine.analyze_position(board.copy())
+        
         for ply_number, played in enumerate(parsed_game.mainline_moves(), start=1):
             fen_before = board.fen()
-            best_move, eval_before = engine.analyze_position(board.copy())
+            best_move = current_best_move
+            eval_before = current_eval
 
             board.push(played)
-            eval_after_for_opponent = engine.evaluate_position(board.copy())
+            
+            # Evaluate the position AFTER the move.
+            # This provides the eval_after for the current ply AND the eval_before for the next ply!
+            next_best_move, next_eval = engine.analyze_position(board.copy())
+            
+            eval_after_for_opponent = next_eval
             eval_after = -eval_after_for_opponent
             eval_drop = max(0.0, eval_before - eval_after)
 
@@ -72,6 +82,10 @@ def compute_game_analysis(pgn: str) -> list[ComputedMove]:
                     eval_drop=eval_drop,
                 )
             )
+            
+            current_best_move = next_best_move
+            current_eval = next_eval
+
     return rows
 
 
