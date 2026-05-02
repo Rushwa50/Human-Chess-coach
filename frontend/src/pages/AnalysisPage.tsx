@@ -1,5 +1,5 @@
 import { Chess } from "chess.js";
-import { ArrowRight, RefreshCw, Volume2, VolumeX } from "lucide-react";
+import { ArrowRight, RefreshCw, Volume2, VolumeX, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import type { Arrow, Square } from "react-chessboard/dist/chessboard/types";
@@ -248,6 +248,50 @@ export default function AnalysisPage() {
     return map;
   }, [analysis]);
 
+  const currentIndex = useMemo(() => {
+    if (!analysis) return -1;
+    return analysis.moves.findIndex(m => m.id === selectedMoveId);
+  }, [analysis, selectedMoveId]);
+
+  const canGoBack = currentIndex > 0;
+  const canGoForward = analysis ? currentIndex < analysis.moves.length - 1 : false;
+
+  const goToPreviousMove = useCallback(() => {
+    if (canGoBack && analysis) setSelectedMoveId(analysis.moves[currentIndex - 1].id);
+  }, [canGoBack, analysis, currentIndex]);
+
+  const goToNextMove = useCallback(() => {
+    if (canGoForward && analysis) setSelectedMoveId(analysis.moves[currentIndex + 1].id);
+  }, [canGoForward, analysis, currentIndex]);
+
+  const goToStart = useCallback(() => {
+    if (analysis && analysis.moves.length > 0) setSelectedMoveId(analysis.moves[0].id);
+  }, [analysis]);
+
+  const goToEnd = useCallback(() => {
+    if (analysis && analysis.moves.length > 0) setSelectedMoveId(analysis.moves[analysis.moves.length - 1].id);
+  }, [analysis]);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        goToPreviousMove();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        goToNextMove();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        goToStart();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        goToEnd();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [goToPreviousMove, goToNextMove, goToStart, goToEnd]);
+
   const computedSummary = useMemo(() => {
     if (!analysis) return {};
     const summary: Record<string, number> = {};
@@ -457,6 +501,40 @@ export default function AnalysisPage() {
               ...(triedDetails ? { [triedDetails.from]: { boxShadow: `inset 0 0 0 4px ${statusArrowColors[triedMove?.status ?? "normal"]}` } } : {})
             }}
           />
+          <div className="mt-3 flex items-center justify-center gap-2 rounded-lg border border-black/10 bg-white p-2">
+            <button 
+              onClick={goToStart} 
+              disabled={!canGoBack}
+              className="rounded-md p-2 hover:bg-black/5 disabled:opacity-30 disabled:hover:bg-transparent"
+              title="Go to start (Up Arrow)"
+            >
+              <ChevronsLeft size={20} />
+            </button>
+            <button 
+              onClick={goToPreviousMove} 
+              disabled={!canGoBack}
+              className="rounded-md p-2 hover:bg-black/5 disabled:opacity-30 disabled:hover:bg-transparent"
+              title="Previous move (Left Arrow)"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button 
+              onClick={goToNextMove} 
+              disabled={!canGoForward}
+              className="rounded-md p-2 hover:bg-black/5 disabled:opacity-30 disabled:hover:bg-transparent"
+              title="Next move (Right Arrow)"
+            >
+              <ChevronRight size={24} />
+            </button>
+            <button 
+              onClick={goToEnd} 
+              disabled={!canGoForward}
+              className="rounded-md p-2 hover:bg-black/5 disabled:opacity-30 disabled:hover:bg-transparent"
+              title="Go to end (Down Arrow)"
+            >
+              <ChevronsRight size={20} />
+            </button>
+          </div>
           <div className="mt-3 grid gap-2 rounded-lg border border-black/10 bg-white p-3 text-sm">
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-8 rounded-full bg-[#228b4a]" />
