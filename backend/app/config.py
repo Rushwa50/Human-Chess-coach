@@ -5,16 +5,21 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
 
-
 class Settings(BaseSettings):
     app_name: str = "Chess Human Coach AI"
     database_url: str = "sqlite+aiosqlite:///./chess_coach.db"
     jwt_secret_key: str = "change-this-in-production"
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24 * 7
+<<<<<<< Updated upstream
     stockfish_path: str = r"c:\Users\Rushwa\OneDrive\Desktop\Chess Coach AI\backend\stockfish18\stockfish\stockfish-windows-x86-64-avx2.exe"
     stockfish_depth: int = 16
     stockfish_time_limit: float = 0.0
+=======
+    stockfish_path: str = r"C:\Users\saura\Downloads\Ai Human coach\Ai Human coach\backend\stockfish18\stockfish\stockfish-windows-x86-64-avx2.exe"
+    stockfish_depth: int = 12
+    stockfish_time_limit: float = 0.15
+>>>>>>> Stashed changes
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     elevenlabs_api_key: str = ""
