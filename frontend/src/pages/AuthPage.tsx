@@ -1,3 +1,4 @@
+import { GoogleLogin } from "@react-oauth/google";
 import { Brain, CheckCircle2, Loader2, LogIn, UserPlus } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -34,6 +35,24 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
       navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoogleLogin(credentialResponse: any) {
+    if (!credentialResponse.credential) return;
+    setLoading(true);
+    setError("");
+    try {
+      const response = await apiFetch<{ access_token: string }>("/auth/google", {
+        method: "POST",
+        body: JSON.stringify({ credential: credentialResponse.credential })
+      });
+      setToken(response.access_token);
+      navigate("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Google Sign-In failed.");
     } finally {
       setLoading(false);
     }
@@ -99,6 +118,20 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
           {loading ? <Loader2 className="animate-spin" size={18} /> : isRegister ? <UserPlus size={18} /> : <LogIn size={18} />}
           {loading ? loadingLabel : isRegister ? "Create account" : "Log in to Dashboard"}
         </button>
+
+        <div className="mt-6 mb-6 flex items-center before:mt-0.5 before:flex-1 before:border-t before:border-slate-700 after:mt-0.5 after:flex-1 after:border-t after:border-slate-700">
+          <p className="mx-4 mb-0 text-center font-semibold text-sm text-slate-400">or</p>
+        </div>
+        
+        <div className="flex justify-center w-full">
+          <GoogleLogin
+            onSuccess={handleGoogleLogin}
+            onError={() => setError("Google Sign-In was cancelled or failed.")}
+            theme="filled_black"
+            text={isRegister ? "signup_with" : "signin_with"}
+            shape="rectangular"
+          />
+        </div>
         
         <p className="mt-6 text-center text-sm font-medium text-slate-400">
           {mode === "login" ? "Don't have an account?" : "Already registered?"}{" "}

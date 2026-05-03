@@ -3,6 +3,8 @@ import hashlib
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
+from google.auth.transport import requests
+from google.oauth2 import id_token
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -15,6 +17,7 @@ from app.schemas import (
     AnalysisRead,
     AuthRequest,
     GameRead,
+    GoogleAuthRequest,
     MistakeRead,
     TokenResponse,
     TTSRequest,
@@ -62,8 +65,38 @@ async def register(payload: AuthRequest, db: AsyncSession = Depends(get_db)) -> 
 @app.post("/auth/login", response_model=TokenResponse)
 async def login(payload: AuthRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
     user = await db.scalar(select(User).where(User.email == payload.email.lower()))
-    if not user or not verify_password(payload.password, user.password_hash):
+    if not user or not user.password_hash or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password.")
+    return TokenResponse(access_token=create_access_token(user.id))
+
+
+@app.post("/auth/google", response_model=TokenResponse)
+async def google_auth(payload: GoogleAuthRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
+    from app.config import get_settings
+    settings = get_settings()
+    if not settings.google_client_id:
+        raise HTTPException(status_code=500, detail="Google authentication is not configured on the server.")
+
+    try:
+        idinfo = id_token.verify_oauth2_token(
+            payload.credential, requests.Request(), settings.google_client_id
+        )
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token")
+
+    email = idinfo.get("email")
+    if not email:
+        raise HTTPException(status_code=400, detail="Email not provided by Google")
+
+    email = email.lower()
+    user = await db.scalar(select(User).where(User.email == email))
+    
+    if not user:
+        user = User(email=email, password_hash=None)
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+
     return TokenResponse(access_token=create_access_token(user.id))
 
 

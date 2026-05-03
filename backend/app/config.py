@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
     elevenlabs_api_key: str = ""
     elevenlabs_voice_id: str = "21m00Tcm4TlvDq8ikWAM"
+    google_client_id: str = ""
 
     model_config = SettingsConfigDict(env_file=ENV_FILE, env_file_encoding="utf-8")
 

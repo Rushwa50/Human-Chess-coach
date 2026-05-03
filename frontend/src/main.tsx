@@ -2,6 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
 import App from "./App";
 import { AuthProvider, useAuth } from "./state/auth";
 import AnalysisPage from "./pages/AnalysisPage";
@@ -17,8 +19,9 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
+      <BrowserRouter>
+        <AuthProvider>
         <Routes>
           <Route element={<App />}>
             <Route path="/login" element={<AuthPage mode="login" />} />
@@ -51,5 +54,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </Routes>
       </AuthProvider>
     </BrowserRouter>
+    </GoogleOAuthProvider>
   </React.StrictMode>
 );
