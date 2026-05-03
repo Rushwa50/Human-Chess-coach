@@ -12,9 +12,9 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "change-this-in-production"
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24 * 7
-    stockfish_path: str = r"C:\Users\BHADRESH THAKKAR\OneDrive\Desktop\Project\Human-Chess-coach\backend\stockfish\stockfish\stockfish-windows-x86-64-avx2.exe"
-    stockfish_depth: int = 12
-    stockfish_time_limit: float = 0.15
+    stockfish_path: str = r"c:\Users\Rushwa\OneDrive\Desktop\Chess Coach AI\backend\stockfish18\stockfish\stockfish-windows-x86-64-avx2.exe"
+    stockfish_depth: int = 16
+    stockfish_time_limit: float = 0.0
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     elevenlabs_api_key: str = ""
