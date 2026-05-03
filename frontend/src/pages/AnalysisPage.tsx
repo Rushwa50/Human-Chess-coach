@@ -10,9 +10,9 @@ import { useAuth } from "../state/auth";
 import type { Analysis, Mistake, Move } from "../types";
 
 const mistakeColors = {
-  inaccuracy: "bg-gold/15 text-yellow-800",
-  mistake: "bg-clay/15 text-orange-800",
-  blunder: "bg-red-100 text-red-800"
+  inaccuracy: "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20",
+  mistake: "bg-orange-500/10 text-orange-400 border border-orange-500/20",
+  blunder: "bg-red-500/10 text-red-400 border border-red-500/20"
 };
 
 type MoveStatus = "brilliant" | "great" | "best" | "excellent" | "good" | "book" | "normal" | "inaccuracy" | "mistake" | "miss" | "blunder";
@@ -32,17 +32,17 @@ const statusLabels: Record<MoveStatus, string> = {
 };
 
 const statusBadgeColors: Record<MoveStatus, string> = {
-  brilliant: "bg-cyan-100 text-cyan-800",
-  great: "bg-blue-100 text-blue-800",
-  best: "bg-green-100 text-green-800",
-  excellent: "bg-moss/15 text-green-800",
-  good: "bg-teal-100 text-teal-800",
-  book: "bg-amber-100 text-amber-800",
-  normal: "bg-gray-100 text-gray-800",
-  inaccuracy: "bg-yellow-100 text-yellow-800",
-  mistake: "bg-orange-100 text-orange-800",
-  miss: "bg-rose-100 text-rose-800",
-  blunder: "bg-red-100 text-red-800"
+  brilliant: "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.3)]",
+  great: "bg-blue-500/20 text-blue-300 border border-blue-500/30",
+  best: "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
+  excellent: "bg-green-500/10 text-green-400 border border-green-500/20",
+  good: "bg-teal-500/10 text-teal-400 border border-teal-500/20",
+  book: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+  normal: "bg-slate-500/10 text-slate-400 border border-slate-500/20",
+  inaccuracy: "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20",
+  mistake: "bg-orange-500/10 text-orange-400 border border-orange-500/20",
+  miss: "bg-rose-500/10 text-rose-400 border border-rose-500/20",
+  blunder: "bg-red-500/10 text-red-400 border border-red-500/20"
 };
 
 const statusArrowColors: Record<MoveStatus, string> = {
@@ -467,105 +467,109 @@ export default function AnalysisPage() {
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Analysis #{analysis.game.id}</h1>
-          <p className="text-sm text-black/60">
-            Status: <span className="font-medium capitalize text-ink">{analysis.game.status}</span>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Analysis #{analysis.game.id}</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            Status: <span className="font-medium capitalize text-sky-400">{analysis.game.status}</span>
             {analysis.game.analysis_error ? ` - ${analysis.game.analysis_error}` : ""}
           </p>
         </div>
         <button 
           onClick={load} 
           disabled={isRefreshing}
-          className="inline-flex items-center gap-2 rounded-md border border-black/10 bg-white px-3 py-2 text-sm transition-colors hover:bg-black/5 disabled:opacity-70"
+          className="inline-flex items-center gap-2 rounded-xl glass-button px-4 py-2.5 text-sm font-medium text-slate-200 disabled:opacity-50"
         >
-          <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
+          <RefreshCw size={16} className={isRefreshing ? "animate-spin text-sky-400" : "text-sky-400"} />
           {isRefreshing ? "Refreshing..." : "Refresh"}
         </button>
       </div>
 
-      <div className="mb-5 grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="mb-8 grid grid-cols-2 sm:grid-cols-5 gap-4">
         {(["brilliant", "great", "mistake", "miss", "blunder"] as const).map((type) => (
-          <div key={type} className="flex flex-col items-center justify-center rounded-lg border border-black/10 bg-white p-3">
-            <p className="text-xl font-semibold">{computedSummary[type] ?? 0}</p>
-            <p className="text-xs capitalize text-black/60">{statusLabels[type]}</p>
+          <div key={type} className="flex flex-col items-center justify-center rounded-2xl glass-panel p-5 transition-transform hover:scale-[1.02] duration-300">
+            <p className={`text-3xl font-bold ${type === 'brilliant' ? 'text-cyan-400 neon-text' : type === 'great' ? 'text-blue-400' : type === 'mistake' ? 'text-orange-400' : type === 'miss' ? 'text-rose-400' : 'text-red-500'}`}>{computedSummary[type] ?? 0}</p>
+            <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-slate-400">{statusLabels[type]}</p>
           </div>
         ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(300px,480px)_1fr]">
-        <div className="w-full">
-          <Chessboard
-            position={boardPosition}
-            boardWidth={Math.min(480, window.innerWidth - 32)}
-            arePiecesDraggable={Boolean(selectedMove)}
-            areArrowsAllowed={Boolean(selectedMove)}
-            onPieceDrop={tryMove}
-            onArrowsChange={tryArrowMove}
-            customArrows={moveArrows}
-            customSquareStyles={{
-              ...(playedDetails ? { [playedDetails.from]: { boxShadow: "inset 0 0 0 4px rgba(210, 74, 48, 0.45)" } } : {}),
-              ...(bestDetails ? { [bestDetails.from]: { boxShadow: "inset 0 0 0 4px rgba(34, 139, 74, 0.5)" } } : {}),
-              ...(triedDetails ? { [triedDetails.from]: { boxShadow: `inset 0 0 0 4px ${statusArrowColors[triedMove?.status ?? "normal"]}` } } : {})
-            }}
-          />
-          <div className="mt-3 flex items-center justify-center gap-2 rounded-lg border border-black/10 bg-white p-2">
+        <div className="w-full flex flex-col gap-4">
+          <div className="overflow-hidden rounded-2xl shadow-[0_0_30px_rgba(14,165,233,0.15)] border border-slate-700/50">
+            <Chessboard
+              position={boardPosition}
+              boardWidth={Math.min(480, window.innerWidth - 32)}
+              arePiecesDraggable={Boolean(selectedMove)}
+              areArrowsAllowed={Boolean(selectedMove)}
+              onPieceDrop={tryMove}
+              onArrowsChange={tryArrowMove}
+              customArrows={moveArrows}
+              customDarkSquareStyle={{ backgroundColor: '#475569' }}
+              customLightSquareStyle={{ backgroundColor: '#cbd5e1' }}
+              customSquareStyles={{
+                ...(playedDetails ? { [playedDetails.from]: { boxShadow: "inset 0 0 0 4px rgba(239, 68, 68, 0.7)" } } : {}),
+                ...(bestDetails ? { [bestDetails.from]: { boxShadow: "inset 0 0 0 4px rgba(16, 185, 129, 0.7)" } } : {}),
+                ...(triedDetails ? { [triedDetails.from]: { boxShadow: `inset 0 0 0 4px ${statusArrowColors[triedMove?.status ?? "normal"]}` } } : {})
+              }}
+            />
+          </div>
+          <div className="flex items-center justify-center gap-2 rounded-2xl glass-panel p-2">
             <button 
               onClick={goToStart} 
               disabled={!canGoBack}
-              className="rounded-md p-2 hover:bg-black/5 disabled:opacity-30 disabled:hover:bg-transparent"
+              className="rounded-xl p-2.5 text-slate-400 hover:text-sky-400 hover:bg-slate-800/80 disabled:opacity-30 disabled:hover:bg-transparent transition-all duration-200"
               title="Go to start (Up Arrow)"
             >
-              <ChevronsLeft size={20} />
+              <ChevronsLeft size={22} />
             </button>
             <button 
               onClick={goToPreviousMove} 
               disabled={!canGoBack}
-              className="rounded-md p-2 hover:bg-black/5 disabled:opacity-30 disabled:hover:bg-transparent"
+              className="rounded-xl p-2.5 text-slate-400 hover:text-sky-400 hover:bg-slate-800/80 disabled:opacity-30 disabled:hover:bg-transparent transition-all duration-200"
               title="Previous move (Left Arrow)"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={26} />
             </button>
             <button 
               onClick={goToNextMove} 
               disabled={!canGoForward}
-              className="rounded-md p-2 hover:bg-black/5 disabled:opacity-30 disabled:hover:bg-transparent"
+              className="rounded-xl p-2.5 text-slate-400 hover:text-sky-400 hover:bg-slate-800/80 disabled:opacity-30 disabled:hover:bg-transparent transition-all duration-200"
               title="Next move (Right Arrow)"
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={26} />
             </button>
             <button 
               onClick={goToEnd} 
               disabled={!canGoForward}
-              className="rounded-md p-2 hover:bg-black/5 disabled:opacity-30 disabled:hover:bg-transparent"
+              className="rounded-xl p-2.5 text-slate-400 hover:text-sky-400 hover:bg-slate-800/80 disabled:opacity-30 disabled:hover:bg-transparent transition-all duration-200"
               title="Go to end (Down Arrow)"
             >
-              <ChevronsRight size={20} />
+              <ChevronsRight size={22} />
             </button>
           </div>
-          <div className="mt-3 grid gap-2 rounded-lg border border-black/10 bg-white p-3 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-8 rounded-full bg-[#228b4a]" />
-              <span>{isExcellentMove ? "Excellent move played" : "Best engine move"}</span>
+          <div className="grid gap-3 rounded-2xl glass-panel p-5 text-sm text-slate-300">
+            <div className="flex items-center gap-3">
+              <span className="h-3 w-3 rounded-full bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+              <span className="font-medium tracking-wide">{isExcellentMove ? "Excellent move played" : "Best engine move"}</span>
             </div>
             {!isExcellentMove && (
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-8 rounded-full bg-[#d24a30]" />
-                <span>Move played in the game</span>
+              <div className="flex items-center gap-3">
+                <span className="h-3 w-3 rounded-full bg-[#ef4444] shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+                <span className="font-medium tracking-wide">Move played in the game</span>
               </div>
             )}
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-8 rounded-full bg-blue-600" />
-              <span>Drag a piece, or right-click and drag an arrow to try a move</span>
+            <div className="flex items-center gap-3">
+              <span className="h-3 w-3 rounded-full bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.5)]" />
+              <span className="text-slate-400">Drag a piece, or right-click and drag an arrow to try a move</span>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-4">
-          <div className="rounded-lg border border-black/10 bg-white">
-            <div className="border-b border-black/10 px-4 py-3 font-medium">Moves</div>
-            <div className="max-h-64 overflow-auto p-2">
+        <div className="grid gap-4 h-full">
+          <div className="rounded-2xl glass-panel flex flex-col h-[calc(100vh-250px)] min-h-[500px]">
+            <div className="border-b border-slate-700/50 px-6 py-4 font-semibold text-white tracking-wide uppercase text-sm">Game Review</div>
+            <div className="flex-1 overflow-auto p-3 scroll-smooth">
               {analysis.moves.map((move) => {
                 const mistake = mistakeByMove.get(move.id);
                 const selected = selectedMoveId === move.id;
@@ -578,12 +582,12 @@ export default function AnalysisPage() {
                     id={`move-${move.id}`}
                     type="button"
                     onClick={() => setSelectedMoveId(move.id)}
-                    className={`mb-1 flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors ${
-                      selected ? "bg-blue-100/60 text-blue-950 font-semibold shadow-sm" : "hover:bg-black/5 text-black/80"
+                    className={`mb-2 flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm transition-all duration-200 ${
+                      selected ? "bg-sky-500/20 text-white font-medium border border-sky-500/30 shadow-[0_0_15px_rgba(14,165,233,0.1)]" : "hover:bg-slate-800/60 text-slate-300 border border-transparent"
                     }`}
                   >
-                    <span className="flex items-center gap-1.5 font-medium">
-                      <span className="w-8 text-right opacity-60 font-mono text-xs">
+                    <span className="flex items-center gap-2 font-medium">
+                      <span className="w-8 text-right opacity-50 font-mono text-xs">
                         {move.move_number % 2 !== 0 ? `${Math.ceil(move.move_number / 2)}.` : `${Math.ceil(move.move_number / 2)}...`}
                       </span>
                       {moveDetails && moveDetails.pieceType && moveDetails.pieceColor ? (
@@ -591,22 +595,22 @@ export default function AnalysisPage() {
                           <img 
                             src={`https://lichess1.org/assets/piece/cburnett/${moveDetails.pieceColor}${moveDetails.pieceType.toUpperCase()}.svg`} 
                             alt={moveDetails.pieceName}
-                            className="h-5 w-5 drop-shadow-sm"
+                            className="h-6 w-6 drop-shadow-md"
                           />
-                          <span>{moveDetails.from}</span>
-                          <ArrowRight size={14} className={selected ? "text-blue-400" : "text-black/40"} />
-                          <span>{moveDetails.to}</span>
+                          <span className="text-base">{moveDetails.from}</span>
+                          <ArrowRight size={14} className={selected ? "text-sky-400" : "text-slate-500"} />
+                          <span className="text-base">{moveDetails.to}</span>
                           {moveDetails.promotion && (
-                            <span className={`text-xs font-bold ${selected ? "text-blue-700" : "text-blue-500"}`}>
+                            <span className={`text-xs font-bold ${selected ? "text-sky-300" : "text-sky-500"}`}>
                               ={moveDetails.promotion.toUpperCase()}
                             </span>
                           )}
                         </>
                       ) : (
-                        <span>{move.played_move}</span>
+                        <span className="text-base">{move.played_move}</span>
                       )}
                     </span>
-                    <span className={`rounded px-2 py-0.5 text-xs font-medium ${selected ? "bg-white shadow-sm " + statusBadgeColors[status].replace("bg-", "text-") : statusBadgeColors[status]}`}>
+                    <span className={`rounded-md px-2.5 py-1 text-xs font-bold tracking-wide ${selected ? "shadow-[0_0_10px_rgba(255,255,255,0.1)] " + statusBadgeColors[status] : statusBadgeColors[status]}`}>
                       {statusLabels[status]}
                     </span>
                   </button>
@@ -615,17 +619,17 @@ export default function AnalysisPage() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-black/10 bg-white p-4">
-            <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="rounded-2xl glass-panel p-6 shadow-[0_0_20px_rgba(0,0,0,0.2)]">
+            <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <p className="font-medium">Coach Explanation</p>
+                <p className="font-semibold text-lg text-white tracking-wide">Coach Explanation</p>
                 {selectedMove && (
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-black/60">
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-400">
                     <span>
                       Played {playedDetails?.san ?? selectedMove.played_move}; best {bestDetails?.san ?? selectedMove.best_move ?? "unknown"}; drop{" "}
-                      {selectedMove.eval_drop.toFixed(2)}
+                      <span className="font-mono text-sky-400">{selectedMove.eval_drop.toFixed(2)}</span>
                     </span>
-                    <span className={`rounded px-2 py-0.5 text-xs font-medium ${statusBadgeColors[visibleStatus]}`}>
+                    <span className={`rounded-md px-2.5 py-1 text-xs font-bold tracking-wide ${statusBadgeColors[visibleStatus]}`}>
                       {statusLabels[visibleStatus]}
                     </span>
                   </div>
@@ -634,35 +638,35 @@ export default function AnalysisPage() {
               {voiceText && (
                 <button
                   onClick={toggleVoice}
-                  className={`inline-flex h-9 w-9 items-center justify-center rounded-md text-white ${isSpeaking || isMuted ? "bg-clay" : "bg-moss"}`}
+                  className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-200 text-white shadow-lg ${isSpeaking || isMuted ? "bg-rose-500 hover:bg-rose-600 shadow-rose-500/30" : "bg-sky-500 hover:bg-sky-600 shadow-sky-500/30"}`}
                   title={isSpeaking ? "Mute explanation" : "Play explanation"}
                 >
-                  {isSpeaking || isMuted ? <VolumeX size={17} /> : <Volume2 size={17} />}
+                  {isSpeaking || isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
                 </button>
               )}
             </div>
-            <div className="grid gap-3 leading-relaxed text-black/75">
+            <div className="grid gap-4 leading-relaxed text-slate-300 text-[15px]">
               {triedMove && triedDetails && (
-                <p className="font-medium text-ink">
+                <p className="font-medium text-slate-200 bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
                   Tried move: {triedDetails.side} {triedDetails.pieceName} from {triedDetails.from} to {triedDetails.to} is{" "}
-                  <span className={visibleStatus === "blunder" ? "text-red-700" : visibleStatus === "excellent" ? "text-green-700" : "text-blue-700"}>
+                  <span className={visibleStatus === "blunder" ? "text-red-400 font-bold" : visibleStatus === "excellent" ? "text-emerald-400 font-bold" : "text-sky-400 font-bold"}>
                     {statusLabels[visibleStatus]}
                   </span>
                   .
                 </p>
               )}
-              {coachIntro && <p className="font-medium text-ink">{coachIntro}</p>}
+              {coachIntro && <p className="font-medium text-white text-lg">{coachIntro}</p>}
               {playedDetails && bestDetails && !isExcellentMove && (
-                <p>
-                  The red arrow shows what was played: {playedDetails.side} {playedDetails.pieceName} from {playedDetails.from} to{" "}
-                  {playedDetails.to}. The green arrow shows the better choice: {bestDetails.side} {bestDetails.pieceName} from {bestDetails.from}{" "}
+                <p className="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50">
+                  The <span className="text-red-400 font-semibold">red arrow</span> shows what was played: {playedDetails.side} {playedDetails.pieceName} from {playedDetails.from} to{" "}
+                  {playedDetails.to}. The <span className="text-emerald-400 font-semibold">green arrow</span> shows the better choice: {bestDetails.side} {bestDetails.pieceName} from {bestDetails.from}{" "}
                   to {bestDetails.to}.
                 </p>
               )}
               {selectedMistake ? (
-                <p>{selectedMistake.explanation}</p>
+                <p className="bg-sky-900/20 p-4 rounded-xl border border-sky-500/20 text-sky-100">{selectedMistake.explanation}</p>
               ) : (
-                <p className="text-black/55">No mistake was found for this move. Use the green arrow to see the strong move on the board.</p>
+                <p className="text-slate-500 italic">No mistake was found for this move. Use the green arrow to see the strong move on the board.</p>
               )}
             </div>
           </div>

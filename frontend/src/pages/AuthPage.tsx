@@ -40,21 +40,27 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
   }
 
   return (
-    <section className="grid min-h-screen place-items-center bg-field px-4 py-8">
-      <form onSubmit={submit} className="w-full max-w-md rounded-lg border border-black/10 bg-white p-6 shadow-sm">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-md bg-moss text-white">
-            <Brain size={22} />
+    <section className="grid min-h-[calc(100vh-80px)] place-items-center px-4 py-12">
+      <div className="absolute inset-0 z-[-1] overflow-hidden">
+        <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-sky-600/20 blur-[100px]" />
+        <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-blue-600/20 blur-[100px]" />
+      </div>
+      
+      <form onSubmit={submit} className="w-full max-w-md rounded-2xl glass-panel p-8 shadow-[0_0_40px_rgba(14,165,233,0.1)]">
+        <div className="mb-8 flex flex-col items-center gap-4 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 shadow-lg shadow-sky-500/30 text-white">
+            <span className="text-4xl">♞</span>
           </div>
           <div>
-            <h1 className="text-xl font-semibold">Chess Human Coach AI</h1>
-            <p className="text-sm text-black/60">{mode === "login" ? "Welcome back" : "Create your account"}</p>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Chess AI Coach</h1>
+            <p className="mt-1 text-sm text-slate-400">{mode === "login" ? "Welcome back to your premium dashboard" : "Create your account for deep analysis"}</p>
           </div>
         </div>
-        <label className="mb-4 block">
-          <span className="mb-1 block text-sm font-medium">Email</span>
+        
+        <label className="mb-5 block">
+          <span className="mb-2 block text-sm font-semibold tracking-wide text-slate-300">Email address</span>
           <input
-            className="w-full rounded-md border border-black/15 px-3 py-2 outline-none transition focus:border-moss focus:ring-2 focus:ring-moss/15"
+            className="w-full rounded-xl border border-slate-700 bg-slate-900/50 px-4 py-3 text-white outline-none transition-all duration-300 focus:border-sky-500 focus:ring-1 focus:ring-sky-500/50"
             type="email"
             autoComplete="email"
             placeholder="you@example.com"
@@ -63,10 +69,11 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
             required
           />
         </label>
-        <label className="mb-4 block">
-          <span className="mb-1 block text-sm font-medium">Password</span>
+        
+        <label className="mb-6 block">
+          <span className="mb-2 block text-sm font-semibold tracking-wide text-slate-300">Password</span>
           <input
-            className="w-full rounded-md border border-black/15 px-3 py-2 outline-none transition focus:border-moss focus:ring-2 focus:ring-moss/15"
+            className="w-full rounded-xl border border-slate-700 bg-slate-900/50 px-4 py-3 text-white outline-none transition-all duration-300 focus:border-sky-500 focus:ring-1 focus:ring-sky-500/50"
             type="password"
             autoComplete={isRegister ? "new-password" : "current-password"}
             placeholder="Minimum 8 characters"
@@ -76,24 +83,27 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
             required
           />
           {isRegister && (
-            <span className={`mt-2 flex items-center gap-1.5 text-xs ${passwordReady ? "text-green-700" : "text-black/55"}`}>
-              <CheckCircle2 size={13} />
+            <span className={`mt-2 flex items-center gap-2 text-xs font-medium ${passwordReady ? "text-emerald-400" : "text-slate-500"}`}>
+              <CheckCircle2 size={14} className={passwordReady ? "text-emerald-400" : "text-slate-600"} />
               Use at least 8 characters.
             </span>
           )}
         </label>
-        {error && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+        
+        {error && <p className="mb-6 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-400">{error}</p>}
+        
         <button
-          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-ink px-4 font-medium text-white transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 font-bold text-white shadow-[0_0_20px_rgba(14,165,233,0.3)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(14,165,233,0.5)] disabled:scale-100 disabled:opacity-50 disabled:shadow-none"
           disabled={loading || !emailReady || !passwordReady}
         >
-          {loading ? <Loader2 className="animate-spin" size={16} /> : isRegister ? <UserPlus size={16} /> : <LogIn size={16} />}
-          {loading ? loadingLabel : isRegister ? "Create account" : "Log in"}
+          {loading ? <Loader2 className="animate-spin" size={18} /> : isRegister ? <UserPlus size={18} /> : <LogIn size={18} />}
+          {loading ? loadingLabel : isRegister ? "Create account" : "Log in to Dashboard"}
         </button>
-        <p className="mt-4 text-center text-sm text-black/60">
-          {mode === "login" ? "No account?" : "Already registered?"}{" "}
-          <Link className="font-medium text-moss" to={mode === "login" ? "/register" : "/login"}>
-            {mode === "login" ? "Register" : "Log in"}
+        
+        <p className="mt-6 text-center text-sm font-medium text-slate-400">
+          {mode === "login" ? "Don't have an account?" : "Already registered?"}{" "}
+          <Link className="text-sky-400 hover:text-sky-300 transition-colors" to={mode === "login" ? "/register" : "/login"}>
+            {mode === "login" ? "Create one now" : "Log in"}
           </Link>
         </p>
       </form>
