@@ -292,6 +292,15 @@ export default function AnalysisPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goToPreviousMove, goToNextMove, goToStart, goToEnd]);
 
+  useEffect(() => {
+    if (selectedMoveId !== null) {
+      const el = document.getElementById(`move-${selectedMoveId}`);
+      if (el) {
+        el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    }
+  }, [selectedMoveId]);
+
   const computedSummary = useMemo(() => {
     if (!analysis) return {};
     const summary: Record<string, number> = {};
@@ -566,6 +575,7 @@ export default function AnalysisPage() {
                 return (
                   <button
                     key={move.id}
+                    id={`move-${move.id}`}
                     type="button"
                     onClick={() => setSelectedMoveId(move.id)}
                     className={`mb-1 flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors ${
