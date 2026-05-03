@@ -12,9 +12,12 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24 * 7
 
-    stockfish_path: str = r"C:\Users\saura\Downloads\Ai Human coach\Ai Human coach\backend\stockfish.exe"
-    stockfish_depth: int = 12
-    stockfish_time_limit: float = 0.15
+    stockfish_path: str = "stockfish"
+    stockfish_depth: int = 16
+    stockfish_time_limit: float = 0.0
+    stockfish_threads: int = 1
+    stockfish_hash_mb: int = 128
+    stockfish_clear_hash_each_position: bool = True
 
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"

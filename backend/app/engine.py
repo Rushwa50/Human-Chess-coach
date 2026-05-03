@@ -27,6 +27,7 @@ def _go_command() -> str:
 
 class StockfishSession:
     def __enter__(self) -> "StockfishSession":
+        self.settings = get_settings()
         self.process = subprocess.Popen(
             [_require_stockfish_path()],
             stdin=subprocess.PIPE,
@@ -37,6 +38,7 @@ class StockfishSession:
         )
         self._send("uci")
         self._read_until("uciok")
+        self._configure_engine()
         self._send("isready")
         self._read_until("readyok")
         return self
@@ -65,7 +67,17 @@ class StockfishSession:
             if line.startswith(token):
                 return lines
 
+    def _configure_engine(self) -> None:
+        self._send(f"setoption name Threads value {self.settings.stockfish_threads}")
+        self._send(f"setoption name Hash value {self.settings.stockfish_hash_mb}")
+        self._send("setoption name MultiPV value 1")
+        self._send("setoption name UCI_AnalyseMode value true")
+
     def _analyse(self, board: chess.Board) -> tuple[str | None, float]:
+        if self.settings.stockfish_clear_hash_each_position:
+            self._send("setoption name Clear Hash")
+            self._send("isready")
+            self._read_until("readyok")
         self._send(f"position fen {board.fen()}")
         self._send(_go_command())
         best_move: str | None = None

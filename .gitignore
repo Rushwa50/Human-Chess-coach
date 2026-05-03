@@ -15,5 +15,6 @@ tools/
 .DS_Store
 Thumbs.db
 backend/stockfish18/
+backend/stockfish18_extracted/
 backend/stockfish18.zip
 backend/dl_sf.py

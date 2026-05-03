@@ -78,7 +78,44 @@ The app runs at `http://localhost:5173`.
 
 ## Stockfish Setup
 
-Install Stockfish locally, then set `STOCKFISH_PATH` in `backend/.env`.
+For production, users do not install Stockfish. Stockfish runs only on the backend server.
+
+Recommended production flow:
+
+```text
+User browser -> frontend website -> FastAPI backend -> Stockfish on backend server
+```
+
+The easiest way to guarantee this is Docker. The backend Docker image downloads the official Stockfish 18 release from GitHub, installs it inside the container, and sets:
+
+```env
+STOCKFISH_PATH="/usr/local/bin/stockfish18"
+STOCKFISH_DEPTH=16
+STOCKFISH_TIME_LIMIT=0.0
+STOCKFISH_THREADS=1
+STOCKFISH_HASH_MB=128
+STOCKFISH_CLEAR_HASH_EACH_POSITION=true
+```
+
+Run the full app with backend-server Stockfish:
+
+```bash
+docker compose up --build
+```
+
+Then open:
+
+```text
+http://localhost:5173
+```
+
+Backend API:
+
+```text
+http://localhost:8000/docs
+```
+
+For local non-Docker development only, install Stockfish locally and set `STOCKFISH_PATH` in `backend/.env`.
 
 Windows:
 
@@ -112,9 +149,13 @@ STOCKFISH_PATH="/usr/games/stockfish"
 Tune speed/quality with:
 
 ```env
-STOCKFISH_DEPTH=12
-STOCKFISH_TIME_LIMIT=0.15
+STOCKFISH_DEPTH=16
+STOCKFISH_TIME_LIMIT=0.0
+STOCKFISH_THREADS=1
+STOCKFISH_HASH_MB=128
 ```
+
+Use fixed depth, `Threads=1`, and the same Stockfish version when you need consistent analysis across devices.
 
 ## API Keys
 

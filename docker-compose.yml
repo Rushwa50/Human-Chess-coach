@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      APP_NAME: "Chess Human Coach AI"
+      DATABASE_URL: "sqlite+aiosqlite:////data/chess_coach.db"
+      JWT_SECRET_KEY: "change-this-before-deploy"
+      JWT_ALGORITHM: "HS256"
+      JWT_EXPIRE_MINUTES: "10080"
+      STOCKFISH_PATH: "/usr/local/bin/stockfish18"
+      STOCKFISH_DEPTH: "16"
+      STOCKFISH_TIME_LIMIT: "0.0"
+      STOCKFISH_THREADS: "1"
+      STOCKFISH_HASH_MB: "128"
+      STOCKFISH_CLEAR_HASH_EACH_POSITION: "true"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      OPENAI_MODEL: "gpt-4o-mini"
+      ELEVENLABS_API_KEY: "${ELEVENLABS_API_KEY:-}"
+      ELEVENLABS_VOICE_ID: "21m00Tcm4TlvDq8ikWAM"
+    volumes:
+      - backend-data:/data
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: "http://localhost:8000"
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  backend-data:
