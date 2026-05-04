@@ -4,6 +4,14 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+
+
+def default_stockfish_path() -> str:
+    bundled_windows_engine = BACKEND_DIR / "stockfish" / "stockfish" / "stockfish-windows-x86-64-avx2.exe"
+    if bundled_windows_engine.exists():
+        return str(bundled_windows_engine)
+    return "stockfish"
 
 class Settings(BaseSettings):
     app_name: str = "Chess Human Coach AI"
@@ -12,7 +20,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24 * 7
 
-    stockfish_path: str = "stockfish"
+    stockfish_path: str = default_stockfish_path()
     stockfish_depth: int = 16
     stockfish_time_limit: float = 0.0
     stockfish_threads: int = 1
