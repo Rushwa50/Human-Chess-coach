@@ -34,6 +34,10 @@ class GameRead(BaseModel):
     pgn_hash: str
     status: str
     analysis_error: str | None = None
+    opening_suggestion: str | None = None
+    loss_reason: str | None = None
+    training_recommendation: str | None = None
+    progress_summary: str | None = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -72,3 +76,13 @@ class AnalysisRead(BaseModel):
 
 class TTSRequest(BaseModel):
     text: str
+
+class Trait(BaseModel):
+    name: str
+    score_label: str
+    description: str
+
+class PlayerProfile(BaseModel):
+    skill_level: str
+    primary_style: str
+    traits: list[Trait]

@@ -19,10 +19,12 @@ from app.schemas import (
     GameRead,
     GoogleAuthRequest,
     MistakeRead,
+    PlayerProfile,
     TokenResponse,
     TTSRequest,
 )
 from app.tts import synthesize_speech
+from app.profiler import analyze_user_profile
 
 app = FastAPI(title="Chess Human Coach AI")
 
@@ -156,6 +158,20 @@ async def analyze_endpoint(
 async def list_games(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)) -> list[Game]:
     result = await db.scalars(select(Game).where(Game.user_id == user.id).order_by(Game.created_at.desc()))
     return list(result)
+
+@app.get("/profile", response_model=PlayerProfile)
+async def get_player_profile(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)) -> PlayerProfile:
+    # Fetch all games with their moves and mistakes
+    query = (
+        select(Game)
+        .where(Game.user_id == user.id, Game.status == "analyzed")
+        .options(
+            selectinload(Game.moves).selectinload(Move.mistakes)
+        )
+    )
+    result = await db.scalars(query)
+    games = list(result)
+    return analyze_user_profile(games)
 
 
 @app.get("/games/{game_id}", response_model=GameRead)

@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 60 * 24 * 7
 
     stockfish_path: str = default_stockfish_path()
-    stockfish_depth: int = 16
+    stockfish_depth: int = 15
     stockfish_time_limit: float = 0.0
     stockfish_threads: int = 1
     stockfish_hash_mb: int = 128

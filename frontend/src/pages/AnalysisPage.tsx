@@ -1,5 +1,5 @@
 import { Chess } from "chess.js";
-import { ArrowRight, RefreshCw, Volume2, VolumeX, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ArrowRight, Brain, RefreshCw, Volume2, VolumeX, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Flame, Target } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import type { Arrow, Square } from "react-chessboard/dist/chessboard/types";
@@ -216,7 +216,6 @@ export default function AnalysisPage() {
   const [error, setError] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [triedMove, setTriedMove] = useState<{ uci: string; status: MoveStatus } | null>(null);
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
   const activeAudioUrlRef = useRef<string | null>(null);
@@ -224,15 +223,12 @@ export default function AnalysisPage() {
 
   async function load() {
     if (!gameId) return;
-    setIsRefreshing(true);
     try {
       const data = await apiFetch<Analysis>(`/analysis/${gameId}`, {}, token);
       setAnalysis(data);
       setSelectedMoveId((current) => current ?? data.moves[0]?.id ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load analysis");
-    } finally {
-      setTimeout(() => setIsRefreshing(false), 600); // Visual feedback
     }
   }
 
@@ -296,7 +292,7 @@ export default function AnalysisPage() {
     if (selectedMoveId !== null) {
       const el = document.getElementById(`move-${selectedMoveId}`);
       if (el) {
-        el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        el.scrollIntoView({ block: "center", behavior: "smooth" });
       }
     }
   }, [selectedMoveId]);
@@ -311,6 +307,19 @@ export default function AnalysisPage() {
     });
     return summary;
   }, [analysis, mistakeByMove]);
+
+  const parsedOpening = useMemo(() => {
+    if (!analysis?.game.opening_suggestion) return null;
+    try {
+      const data = JSON.parse(analysis.game.opening_suggestion);
+      if (data.opening_name && data.white_suggestion && data.black_suggestion) {
+        return data as { opening_name: string; white_suggestion: string; black_suggestion: string };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, [analysis?.game.opening_suggestion]);
 
   const selectedMove = analysis?.moves.find((move) => move.id === selectedMoveId) ?? null;
   const selectedMistake = selectedMove ? mistakeByMove.get(selectedMove.id) : analysis?.mistakes[0];
@@ -469,27 +478,55 @@ export default function AnalysisPage() {
     <section className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Analysis #{analysis.game.id}</h1>
-          <p className="mt-1 text-sm text-slate-400">
-            Status: <span className="font-medium capitalize text-sky-400">{analysis.game.status}</span>
+          <h1 className="text-3xl font-display font-bold tracking-tight text-white">Coach Review #{analysis.game.id}</h1>
+          <p className="mt-1 text-sm text-coach-muted">
+            Status: <span className="font-medium capitalize text-coach-accent">{analysis.game.status}</span>
             {analysis.game.analysis_error ? ` - ${analysis.game.analysis_error}` : ""}
           </p>
         </div>
-        <button 
-          onClick={load} 
-          disabled={isRefreshing}
-          className="inline-flex items-center gap-2 rounded-xl glass-button px-4 py-2.5 text-sm font-medium text-slate-200 disabled:opacity-50"
-        >
-          <RefreshCw size={16} className={isRefreshing ? "animate-spin text-sky-400" : "text-sky-400"} />
-          {isRefreshing ? "Refreshing..." : "Refresh"}
-        </button>
       </div>
 
-      <div className="mb-8 grid grid-cols-2 sm:grid-cols-5 gap-4">
+      {analysis.game.loss_reason && (
+        <div className="mb-8 rounded-2xl bg-coach-card border border-coach-lesson/30 p-8 shadow-xl relative overflow-hidden group">
+          <div className="absolute -top-10 -right-10 p-8 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-700 pointer-events-none">
+            <Flame size={240} className="text-coach-lesson" />
+          </div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold tracking-widest text-coach-lesson uppercase flex items-center gap-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-coach-lesson shadow-[0_0_10px_rgba(245,158,11,0.6)] animate-pulse"></span>
+                Today's Core Lesson
+              </h2>
+              <div className="flex items-center gap-2">
+                {analysis.game.lesson_status === "mastered" && (
+                  <span className="bg-coach-success/20 text-coach-success text-xs font-bold px-3 py-1.5 rounded-full border border-coach-success/30 flex items-center gap-1">
+                    <Target size={14} /> Lesson Mastered!
+                  </span>
+                )}
+                {analysis.game.lesson_status === "repeated" && (
+                  <span className="bg-coach-lesson/20 text-coach-lesson text-xs font-bold px-3 py-1.5 rounded-full border border-coach-lesson/30 flex items-center gap-1">
+                    <RefreshCw size={14} /> Reinforcement: Game {analysis.game.lesson_repetition}
+                  </span>
+                )}
+                {analysis.game.lesson_status === "new" && (
+                  <span className="bg-coach-accent/20 text-coach-accent text-xs font-bold px-3 py-1.5 rounded-full border border-coach-accent/30 flex items-center gap-1">
+                    <Flame size={14} /> New Lesson
+                  </span>
+                )}
+              </div>
+            </div>
+            <p className="text-2xl md:text-3xl text-coach-text leading-relaxed font-light tracking-wide max-w-4xl">
+              "{analysis.game.loss_reason}"
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="mb-8 flex flex-wrap gap-3">
         {(["brilliant", "great", "mistake", "miss", "blunder"] as const).map((type) => (
-          <div key={type} className="flex flex-col items-center justify-center rounded-2xl glass-panel p-5 transition-transform hover:scale-[1.02] duration-300">
-            <p className={`text-3xl font-bold ${type === 'brilliant' ? 'text-cyan-400 neon-text' : type === 'great' ? 'text-blue-400' : type === 'mistake' ? 'text-orange-400' : type === 'miss' ? 'text-rose-400' : 'text-red-500'}`}>{computedSummary[type] ?? 0}</p>
-            <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-slate-400">{statusLabels[type]}</p>
+          <div key={type} className="flex items-center gap-3 rounded-xl glass-panel px-4 py-2 opacity-80 hover:opacity-100 transition-opacity">
+            <span className={`text-xl font-bold ${type === 'brilliant' ? 'text-cyan-400' : type === 'great' ? 'text-blue-400' : type === 'mistake' ? 'text-orange-400' : type === 'miss' ? 'text-rose-400' : 'text-red-500'}`}>{computedSummary[type] ?? 0}</span>
+            <span className="text-xs font-medium uppercase tracking-wider text-coach-muted">{statusLabels[type]}</span>
           </div>
         ))}
       </div>
@@ -512,6 +549,7 @@ export default function AnalysisPage() {
                 ...(bestDetails ? { [bestDetails.from]: { boxShadow: "inset 0 0 0 4px rgba(16, 185, 129, 0.7)" } } : {}),
                 ...(triedDetails ? { [triedDetails.from]: { boxShadow: `inset 0 0 0 4px ${statusArrowColors[triedMove?.status ?? "normal"]}` } } : {})
               }}
+              animationDuration={150}
             />
           </div>
           <div className="flex items-center justify-center gap-2 rounded-2xl glass-panel p-2">
@@ -568,7 +606,7 @@ export default function AnalysisPage() {
 
         <div className="grid gap-4 h-full">
           <div className="rounded-2xl glass-panel flex flex-col h-[calc(100vh-250px)] min-h-[500px]">
-            <div className="border-b border-slate-700/50 px-6 py-4 font-semibold text-white tracking-wide uppercase text-sm">Game Review</div>
+            <div className="border-b border-slate-700/50 px-6 py-4 font-semibold text-white tracking-wide uppercase text-sm flex items-center gap-2"><Brain size={16} className="text-coach-accent" /> Move Breakdown</div>
             <div className="flex-1 overflow-auto p-3 scroll-smooth">
               {analysis.moves.map((move) => {
                 const mistake = mistakeByMove.get(move.id);
@@ -622,7 +660,7 @@ export default function AnalysisPage() {
           <div className="rounded-2xl glass-panel p-6 shadow-[0_0_20px_rgba(0,0,0,0.2)]">
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <p className="font-semibold text-lg text-white tracking-wide">Coach Explanation</p>
+                <p className="font-semibold text-lg text-white tracking-wide">Coach Notes</p>
                 {selectedMove && (
                   <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-400">
                     <span>
@@ -664,12 +702,74 @@ export default function AnalysisPage() {
                 </p>
               )}
               {selectedMistake ? (
-                <p className="bg-sky-900/20 p-4 rounded-xl border border-sky-500/20 text-sky-100">{selectedMistake.explanation}</p>
+                <p className="bg-coach-accent/10 p-4 rounded-xl border border-coach-accent/20 text-coach-text">{selectedMistake.explanation}</p>
               ) : (
-                <p className="text-slate-500 italic">No mistake was found for this move. Use the green arrow to see the strong move on the board.</p>
+                <p className="text-coach-muted italic">Coach approves of this move. No corrections needed here.</p>
               )}
             </div>
           </div>
+          {analysis.game.opening_suggestion && parsedOpening && (
+            <div className="rounded-2xl glass-panel p-6 shadow-[0_0_20px_rgba(0,0,0,0.2)] mt-0">
+              <div className="mb-6">
+                <p className="font-semibold text-lg text-white tracking-wide">Opening Coach: <span className="text-sky-400">{parsedOpening.opening_name}</span></p>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-slate-800/50 p-5 rounded-xl border border-slate-700/50 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-slate-300"></div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="h-4 w-4 rounded-full bg-slate-200 shadow-[0_0_10px_rgba(255,255,255,0.5)]"></span>
+                    <span className="font-bold text-white tracking-wide">White Strategy</span>
+                  </div>
+                  <p className="text-slate-300 text-[15px] leading-relaxed">{parsedOpening.white_suggestion}</p>
+                </div>
+                <div className="bg-slate-900/80 p-5 rounded-xl border border-slate-800 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-slate-700"></div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="h-4 w-4 rounded-full bg-slate-900 border border-slate-700 shadow-[0_0_10px_rgba(0,0,0,0.8)]"></span>
+                    <span className="font-bold text-white tracking-wide">Black Strategy</span>
+                  </div>
+                  <p className="text-slate-300 text-[15px] leading-relaxed">{parsedOpening.black_suggestion}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          {analysis.game.opening_suggestion && !parsedOpening && (
+            <div className="rounded-2xl glass-panel p-6 shadow-[0_0_20px_rgba(0,0,0,0.2)] mt-0">
+              <div className="mb-4">
+                <p className="font-semibold text-lg text-white tracking-wide">Opening Coach</p>
+              </div>
+              <div className="grid gap-4 leading-relaxed text-slate-300 text-[15px]">
+                <p className="bg-emerald-900/20 p-4 rounded-xl border border-emerald-500/20 text-emerald-100 whitespace-pre-wrap">{analysis.game.opening_suggestion}</p>
+              </div>
+            </div>
+          )}
+          {(analysis.game.training_recommendation || analysis.game.progress_summary) && (
+            <div className="rounded-2xl glass-panel p-6 shadow-lg mt-0">
+              <div className="mb-6">
+                <p className="font-semibold text-lg text-coach-text tracking-wide">Game Summary & Progress</p>
+              </div>
+              <div className="grid gap-6">
+                {analysis.game.progress_summary && (
+                  <div className="bg-coach-bg/50 p-5 rounded-xl border border-slate-700/50">
+                    <p className="font-bold text-coach-muted mb-2 tracking-wide flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-coach-accent"></span>
+                      Progress Tracking
+                    </p>
+                    <p className="text-coach-text text-[15px] leading-relaxed whitespace-pre-wrap">{analysis.game.progress_summary}</p>
+                  </div>
+                )}
+                {analysis.game.training_recommendation && (
+                  <div className="bg-coach-bg/50 p-5 rounded-xl border border-slate-700/50">
+                    <p className="font-bold text-coach-muted mb-2 tracking-wide flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-coach-success"></span>
+                      Recommended Training
+                    </p>
+                    <p className="text-coach-text text-[15px] leading-relaxed whitespace-pre-wrap">{analysis.game.training_recommendation}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>

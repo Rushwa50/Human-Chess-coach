@@ -41,6 +41,9 @@ class StockfishSession:
         self._configure_engine()
         self._send("isready")
         self._read_until("readyok")
+        self._send("ucinewgame")
+        self._send("isready")
+        self._read_until("readyok")
         return self
 
     def __exit__(self, exc_type, exc, traceback) -> None:

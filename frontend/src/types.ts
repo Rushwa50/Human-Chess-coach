@@ -3,6 +3,12 @@ export type Game = {
   pgn_hash: string;
   status: "uploaded" | "queued" | "analyzing" | "analyzed" | "failed";
   analysis_error?: string | null;
+  opening_suggestion?: string | null;
+  loss_reason?: string | null;
+  training_recommendation?: string | null;
+  progress_summary?: string | null;
+  lesson_status?: "new" | "repeated" | "mastered" | null;
+  lesson_repetition?: number | null;
   created_at: string;
 };
 
@@ -32,3 +38,15 @@ export type Analysis = {
   mistakes: Mistake[];
   summary: Record<string, number>;
 };
+
+export type Trait = {
+  name: string;
+  score_label: string;
+  description: string;
+};
+
+export type PlayerProfile = {
+  primary_style: string;
+  traits: Trait[];
+};
+

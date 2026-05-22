@@ -15,6 +15,7 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     games: Mapped[list["Game"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    mistake_patterns: Mapped[list["PlayerMistakePattern"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
 class Game(Base):
@@ -27,6 +28,12 @@ class Game(Base):
     pgn_hash: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
     status: Mapped[str] = mapped_column(String(32), default="uploaded", nullable=False)
     analysis_error: Mapped[str | None] = mapped_column(Text)
+    opening_suggestion: Mapped[str | None] = mapped_column(Text)
+    loss_reason: Mapped[str | None] = mapped_column(Text)
+    training_recommendation: Mapped[str | None] = mapped_column(Text)
+    progress_summary: Mapped[str | None] = mapped_column(Text)
+    lesson_status: Mapped[str | None] = mapped_column(String(32))
+    lesson_repetition: Mapped[int | None] = mapped_column(Integer, default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     user: Mapped["User"] = relationship(back_populates="games")
@@ -60,3 +67,16 @@ class Mistake(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     move: Mapped["Move"] = relationship(back_populates="mistakes")
+
+
+class PlayerMistakePattern(Base):
+    __tablename__ = "player_mistake_patterns"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True, nullable=False)
+    mistake_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    frequency: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    severity: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    user: Mapped["User"] = relationship(back_populates="mistake_patterns")
