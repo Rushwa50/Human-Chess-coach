@@ -19,7 +19,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex flex-col bg-coach-bg text-coach-text font-inter pb-16 md:pb-0">
       {/* Desktop Header */}
-      <header className="hidden md:block sticky top-0 z-50 border-b border-slate-800 bg-coach-bg/80 backdrop-blur-md">
+      <header className="hidden md:block sticky top-0 z-50 border-b border-coach-border bg-coach-bg/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-sky-400 to-blue-600 shadow-lg shadow-sky-500/30 group-hover:shadow-sky-400/50 transition-all duration-300">
@@ -41,7 +41,7 @@ export default function Layout() {
                   className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-300 ${
                     isActive 
                       ? "bg-coach-accent/10 text-coach-accent" 
-                      : "text-coach-muted hover:bg-slate-800 hover:text-slate-200"
+                      : "text-coach-muted hover:bg-coach-accent/10 hover:text-coach-text"
                   }`}
                 >
                   <Icon size={16} />
@@ -54,7 +54,7 @@ export default function Layout() {
           <div className="flex items-center">
             <button
               onClick={logout}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-coach-muted hover:bg-slate-800 hover:text-rose-400 transition-colors"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-coach-muted hover:bg-coach-accent/10 hover:text-rose-400 transition-colors"
             >
               <LogOut size={16} />
               Logout
@@ -64,7 +64,7 @@ export default function Layout() {
       </header>
 
       {/* Mobile Header (Just Logo) */}
-      <header className="md:hidden sticky top-0 z-50 border-b border-slate-800 bg-coach-bg/90 backdrop-blur-md">
+      <header className="md:hidden sticky top-0 z-50 border-b border-coach-border bg-coach-bg/90 backdrop-blur-md">
         <div className="flex h-14 items-center justify-center px-4">
           <Link to="/" className="flex items-center gap-2">
             <span className="text-xl text-coach-accent">♞</span>
@@ -84,7 +84,7 @@ export default function Layout() {
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-slate-800 bg-coach-bg/95 backdrop-blur-lg pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-coach-border bg-coach-bg/95 backdrop-blur-lg pb-safe">
         <div className="flex items-center justify-around px-2 py-2">
           {navLinks.slice(0, 4).map((link) => {
             const Icon = link.icon;

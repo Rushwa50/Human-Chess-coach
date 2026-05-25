@@ -4,9 +4,33 @@
 
 @layer base {
   :root {
-    --bg-dark: #0F172A;
-    --text-main: #F8FAFC;
-    --text-muted: #94A3B8;
+    --coach-bg: 15, 23, 42;
+    --coach-card: 30, 41, 59;
+    --coach-accent: 59, 130, 246;
+    --coach-success: 34, 197, 94;
+    --coach-lesson: 245, 158, 11;
+    --coach-text: 248, 250, 252;
+    --coach-muted: 148, 163, 184;
+    --coach-border: 30, 41, 59;
+
+    --bg-dark: rgb(15, 23, 42);
+    --text-main: rgb(248, 250, 252);
+    --text-muted: rgb(148, 163, 184);
+  }
+
+  .light {
+    --coach-bg: 248, 250, 252;
+    --coach-card: 255, 255, 255;
+    --coach-accent: 37, 99, 235;
+    --coach-success: 22, 163, 74;
+    --coach-lesson: 217, 119, 6;
+    --coach-text: 15, 23, 42;
+    --coach-muted: 71, 85, 105;
+    --coach-border: 226, 232, 240;
+
+    --bg-dark: rgb(248, 250, 252);
+    --text-main: rgb(15, 23, 42);
+    --text-muted: rgb(71, 85, 105);
   }
 
   * {
@@ -31,10 +55,15 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-coach-card border border-slate-800 shadow-lg;
+    @apply bg-coach-card border shadow-lg;
+    border-color: rgb(var(--coach-border));
   }
   .glass-button {
-    @apply bg-coach-card border border-slate-700 hover:bg-slate-700/80 transition-all duration-300 text-coach-text;
+    @apply bg-coach-card border transition-all duration-300 text-coach-text;
+    border-color: rgb(var(--coach-border));
+  }
+  .glass-button:hover {
+    background-color: color-mix(in srgb, var(--coach-accent) 10%, transparent);
   }
   .hover-lift {
     @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl;
@@ -57,3 +86,38 @@
     @apply bg-slate-700;
   }
 }
+
+/* Light mode overrides for legacy slate and white utility classes */
+.light .text-white:not(.bg-gradient-to-r *, button, button *, a.rounded-xl *, .bg-coach-lesson *) {
+  color: #0F172A !important;
+}
+.light .text-slate-100 {
+  color: #0F172A !important;
+}
+.light .text-slate-200 {
+  color: #1E293B !important;
+}
+.light .text-slate-300 {
+  color: #334155 !important;
+}
+.light .text-slate-400 {
+  color: #475569 !important;
+}
+.light .bg-slate-900,
+.light .bg-slate-950,
+.light .bg-slate-900\/50 {
+  background-color: #F8FAFC !important;
+}
+.light .bg-slate-800,
+.light .bg-slate-800\/50,
+.light .bg-slate-800\/40 {
+  background-color: #FFFFFF !important;
+}
+.light .border-slate-800,
+.light .border-slate-700 {
+  border-color: #E2E8F0 !important;
+}
+.light .divide-slate-800 {
+  border-color: #E2E8F0 !important;
+}
+

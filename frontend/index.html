@@ -7,8 +7,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>Chess AI Coach | Premium Analysis</title>
+    <script>
+      (function() {
+        const theme = localStorage.getItem("theme");
+        if (theme === "light") {
+          document.documentElement.classList.add("light");
+          document.documentElement.classList.remove("dark");
+        } else {
+          document.documentElement.classList.add("dark");
+          document.documentElement.classList.remove("light");
+        }
+      })();
+    </script>
   </head>
-  <body class="bg-dark text-gray-100 antialiased font-inter">
+  <body class="antialiased font-inter">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

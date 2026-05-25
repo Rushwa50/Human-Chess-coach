@@ -139,7 +139,6 @@ function isSacrifice(fen: string, uciMove: string | null | undefined): boolean {
     const isDefended = chess.isAttacked(to, piece.color);
     if (!isDefended) {
        // Only brilliant if it's a clear piece sacrifice (not a pawn) and we have a strong follow-up (eval_drop is very small, handled by caller)
-       if (piece.type === 'p') return false;
        return true;
     }
 

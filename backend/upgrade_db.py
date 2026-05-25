@@ -7,17 +7,21 @@ def upgrade_db():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
-    try:
-        cursor.execute("ALTER TABLE games ADD COLUMN lesson_status VARCHAR(32);")
-        print("Added lesson_status column.")
-    except sqlite3.OperationalError as e:
-        print(f"Skipped lesson_status: {e}")
-        
-    try:
-        cursor.execute("ALTER TABLE games ADD COLUMN lesson_repetition INTEGER DEFAULT 1;")
-        print("Added lesson_repetition column.")
-    except sqlite3.OperationalError as e:
-        print(f"Skipped lesson_repetition: {e}")
+    columns_to_add = [
+        ("opening_suggestion", "TEXT"),
+        ("loss_reason", "TEXT"),
+        ("training_recommendation", "TEXT"),
+        ("progress_summary", "TEXT"),
+        ("lesson_status", "VARCHAR(32)"),
+        ("lesson_repetition", "INTEGER DEFAULT 1")
+    ]
+    
+    for col_name, col_type in columns_to_add:
+        try:
+            cursor.execute(f"ALTER TABLE games ADD COLUMN {col_name} {col_type};")
+            print(f"Added {col_name} column.")
+        except sqlite3.OperationalError as e:
+            print(f"Skipped {col_name}: {e}")
         
     conn.commit()
     conn.close()

@@ -5,6 +5,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import { AuthProvider, useAuth } from "./state/auth";
+import { ThemeProvider } from "./state/theme";
 import Layout from "./components/Layout";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
@@ -30,24 +31,26 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
       <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            {/* Public Routes without Layout */}
-            <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
-            <Route path="/login" element={<PublicRoute><AuthPage mode="login" /></PublicRoute>} />
-            <Route path="/register" element={<PublicRoute><AuthPage mode="register" /></PublicRoute>} />
+        <ThemeProvider>
+          <AuthProvider>
+            <Routes>
+              {/* Public Routes without Layout */}
+              <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+              <Route path="/login" element={<PublicRoute><AuthPage mode="login" /></PublicRoute>} />
+              <Route path="/register" element={<PublicRoute><AuthPage mode="register" /></PublicRoute>} />
 
-            {/* Protected Routes with Layout */}
-            <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/upload" element={<UploadPage />} />
-              <Route path="/history" element={<GameHistoryPage />} />
-              <Route path="/insights" element={<InsightsPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/analysis/:gameId" element={<AnalysisPage />} />
-            </Route>
-          </Routes>
-        </AuthProvider>
+              {/* Protected Routes with Layout */}
+              <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/upload" element={<UploadPage />} />
+                <Route path="/history" element={<GameHistoryPage />} />
+                <Route path="/insights" element={<InsightsPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/analysis/:gameId" element={<AnalysisPage />} />
+              </Route>
+            </Routes>
+          </AuthProvider>
+        </ThemeProvider>
       </BrowserRouter>
     </GoogleOAuthProvider>
   </React.StrictMode>

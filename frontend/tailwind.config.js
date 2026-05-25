@@ -5,13 +5,14 @@ export default {
     extend: {
       colors: {
         coach: {
-          bg: "#0F172A",
-          card: "#1E293B",
-          accent: "#3B82F6",
-          success: "#22C55E",
-          lesson: "#F59E0B",
-          text: "#F8FAFC",
-          muted: "#94A3B8"
+          bg: "rgba(var(--coach-bg), <alpha-value>)",
+          card: "rgba(var(--coach-card), <alpha-value>)",
+          accent: "rgba(var(--coach-accent), <alpha-value>)",
+          success: "rgba(var(--coach-success), <alpha-value>)",
+          lesson: "rgba(var(--coach-lesson), <alpha-value>)",
+          text: "rgba(var(--coach-text), <alpha-value>)",
+          muted: "rgba(var(--coach-muted), <alpha-value>)",
+          border: "rgba(var(--coach-border), <alpha-value>)"
         }
       },
       fontFamily: {
