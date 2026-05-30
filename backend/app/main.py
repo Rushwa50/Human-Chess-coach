@@ -1,12 +1,21 @@
 import hashlib
-
-from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, UploadFile, status
+# pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
+# pyrefly: ignore [missing-import]
+from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, UploadFile, status
+# pyrefly: ignore [missing-import]
+from fastapi.middleware.cors import CORSMiddleware
+# pyrefly: ignore [missing-import]
 from fastapi.responses import Response
+# pyrefly: ignore [missing-import]
 from google.auth.transport import requests
+# pyrefly: ignore [missing-import]
 from google.oauth2 import id_token
+# pyrefly: ignore [missing-import]
 from sqlalchemy import select
+# pyrefly: ignore [missing-import]
 from sqlalchemy.ext.asyncio import AsyncSession
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import selectinload
 
 from app.analyzer import analyze_game
@@ -27,6 +36,13 @@ from app.tts import synthesize_speech
 from app.profiler import analyze_user_profile
 
 app = FastAPI(title="Chess Human Coach AI")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.add_middleware(
     CORSMiddleware,

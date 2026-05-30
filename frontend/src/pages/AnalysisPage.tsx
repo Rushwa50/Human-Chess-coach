@@ -473,6 +473,25 @@ export default function AnalysisPage() {
   if (error) return <section className="mx-auto max-w-6xl px-4 py-8 text-red-700">{error}</section>;
   if (!analysis) return <section className="mx-auto max-w-6xl px-4 py-8">Loading analysis...</section>;
 
+  if (analysis.game.status === 'queued' || analysis.game.status === 'analyzing' || analysis.game.status === 'uploaded') {
+    return (
+      <section className="mx-auto max-w-4xl px-4 py-32 text-center flex flex-col items-center justify-center animate-fade-in">
+        <div className="mb-8 relative">
+           <div className="absolute inset-0 bg-sky-500/20 blur-2xl rounded-full animate-pulse"></div>
+           <Brain size={72} className="text-sky-400 relative z-10 animate-bounce" />
+        </div>
+        <h2 className="text-4xl font-bold text-white mb-6 tracking-tight">Hold tight!</h2>
+        <p className="text-xl text-slate-300 max-w-lg leading-relaxed">
+          Your game is currently being analyzed by the AI coach. This deep engine evaluation usually takes a few seconds.
+        </p>
+        <div className="mt-12 flex items-center gap-3 text-sky-400 bg-sky-500/10 px-6 py-3 rounded-full border border-sky-500/20 shadow-[0_0_20px_rgba(14,165,233,0.15)]">
+          <RefreshCw size={18} className="animate-spin" />
+          <span className="font-medium tracking-wide">Processing engine evaluation...</span>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">

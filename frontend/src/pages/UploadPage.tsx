@@ -59,6 +59,13 @@ export default function UploadPage() {
         
         {error && <p className="mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-400">{error}</p>}
         
+        {loading && (
+          <div className="mt-6 flex items-center gap-3 rounded-xl border border-sky-500/30 bg-sky-500/10 px-5 py-4 text-sm font-medium text-sky-300">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-sky-400 border-t-transparent"></div>
+            Hold tight! Your game is being analyzed by the AI coach. This usually takes a few seconds.
+          </div>
+        )}
+
         <div className="mt-8 flex justify-end">
           <button
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-8 py-3.5 font-semibold tracking-wide text-white shadow-[0_0_20px_rgba(14,165,233,0.3)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(14,165,233,0.5)] disabled:opacity-50 disabled:hover:scale-100"
