@@ -160,9 +160,51 @@ async def explain_mistake(fen: str, played_move: str, best_move: str | None, eva
         return fallback
 
 
+import random
+
+FALLBACK_LESSONS = [
+    "Consistency beats motivation.", "Start before you feel ready.", "Focus on progress, not perfection.",
+    "Small habits create big results.", "Learn from every mistake.", "Time is your most valuable asset.",
+    "Prioritize what matters most.", "Discipline creates freedom.", "Action reduces anxiety.",
+    "Success leaves clues.", "Listen more than you speak.", "Build systems, not goals.",
+    "Embrace constructive feedback.", "Stay curious every day.", "Confidence comes from preparation.",
+    "Solve problems proactively.", "Practice gratitude daily.", "Growth happens outside comfort zones.",
+    "Learn to say no.", "Persistence beats talent.", "Take ownership of outcomes.",
+    "Manage energy, not just time.", "Adapt to changing situations.", "Every expert was once a beginner.",
+    "Rest is productive.", "Think long-term.", "Develop a learning mindset.", "Communicate clearly.",
+    "Celebrate small wins.", "Challenge limiting beliefs.", "Build trust through actions.",
+    "Learn from successful people.", "Stay organized.", "Ask better questions.", "Focus on solutions.",
+    "Consistency compounds.", "Avoid unnecessary distractions.", "Keep promises to yourself.",
+    "Master the basics.", "Patience creates better results.", "Learn from failure.",
+    "Seek continuous improvement.", "Practice active listening.", "Stay resilient during setbacks.",
+    "Invest in relationships.", "Take calculated risks.", "Manage stress effectively.",
+    "Develop self-awareness.", "Learn something new today.", "Be accountable.",
+    "Focus on what you can control.", "Create positive routines.", "Learn to delegate.",
+    "Keep an open mind.", "Build mental toughness.", "Stay humble while growing.",
+    "Embrace lifelong learning.", "Lead by example.", "Think critically.", "Stay adaptable.",
+    "Set clear priorities.", "Practice mindfulness.", "Learn from criticism.",
+    "Develop problem-solving skills.", "Stay optimistic.", "Value teamwork.",
+    "Improve communication daily.", "Take initiative.", "Build healthy habits.",
+    "Stay committed to your goals.", "Learn from diverse perspectives.", "Protect your focus.",
+    "Be resourceful.", "Cultivate patience.", "Stay authentic.", "Keep improving your skills.",
+    "Take responsibility for growth.", "Focus on impact.", "Stay organized and prepared.",
+    "Learn to recover from setbacks.", "Develop emotional intelligence.", "Build strong foundations.",
+    "Think before reacting.", "Stay flexible in your approach.", "Learn from every experience.",
+    "Make decisions confidently.", "Value quality over quantity.", "Be proactive, not reactive.",
+    "Stay committed to excellence.", "Keep your promises.", "Learn to manage uncertainty.",
+    "Focus on continuous learning.", "Build resilience daily.", "Develop leadership qualities.",
+    "Practice self-discipline.", "Stay goal-oriented.", "Create value for others.",
+    "Learn to simplify.", "Maintain a positive attitude.", "Never stop growing."
+]
+
 async def generate_game_summaries(mistakes_list: list[dict], coaching_context: dict | None = None) -> dict[str, str]:
     settings = get_settings()
-    fallback = {"loss_reason": "No summary available.", "recommended_training": "No recommendations available.", "progress_summary": "No progress data."}
+    fallback = {
+        "loss_reason": random.choice(FALLBACK_LESSONS),
+        "recommended_training": "No recommendations available.",
+        "progress_summary": "No progress data.",
+        "lesson_status": "new"
+    }
     if not settings.openai_api_key or not mistakes_list:
         return fallback
         
@@ -171,11 +213,13 @@ async def generate_game_summaries(mistakes_list: list[dict], coaching_context: d
     system_prompt = (
         "You are an expert chess coach analyzing a full game. Your feedback must be deeply insightful, focusing on strategic reasoning and behavioral observations rather than surface-level tactical errors.\n"
         "Based on the provided list of mistakes the player made and their historical recurring weaknesses, "
-        "generate three things:\n"
+        "generate four things:\n"
         "1. A 'Key Takeaway' section ('loss_reason'). Generate exactly ONE focused coaching takeaway (1-2 sentences) highlighting the single most important lesson from this game. Do NOT list multiple bullet points.\n"
         "2. A 'Recommended Training' section with 3 actionable, personalized focus areas to study next. This MUST strictly follow the LONG-TERM LEARNING STRATEGY provided in the context below.\n"
         "3. A 'Progress Summary' section highlighting areas where the player has improved, comparing their current performance to their historical recurring weaknesses and recent game history. If `weakness_trends` are provided, explicitly state which weaknesses are improving and which keep repeating.\n"
-        "Provide your answer ONLY as a JSON object with keys 'loss_reason', 'lesson_status', 'recommended_training', and 'progress_summary'.\n"
+        "4. A 'Game Story' section ('game_story'). Create a short, dramatic summary of the game's momentum shifts. Format it exactly like this:\n"
+        "Game Story:\n- Peak Moment: [short description]\n- Turning Point: [short description]\n- Critical Mistake: [short description]\n- Recovery Attempt: [short description]\n- Today's Core Lesson: [short description]\n"
+        "Provide your answer ONLY as a JSON object with keys 'loss_reason', 'lesson_status', 'recommended_training', 'progress_summary', and 'game_story'.\n"
         "The 'lesson_status' MUST be exactly one of: 'mastered' (if they improved on the active lesson), 'repeated' (if they failed the active lesson again), or 'new' (if assigning a brand new lesson).\n"
         "Ensure your tone is uniquely human, deeply observant, and strictly avoids repetitive or generic coaching phrases. Do NOT generate long essays, complex engine evaluations, or overly technical jargon."
     )
@@ -214,6 +258,7 @@ async def generate_game_summaries(mistakes_list: list[dict], coaching_context: d
             max_tokens=500,
         )
         content = response.choices[0].message.content
+        print(f"DEBUG AI SUMMARY RESPONSE: {content}", flush=True)
         import json
         return json.loads(content)
     except Exception:

@@ -29,20 +29,6 @@ class GameUploadRequest(BaseModel):
     pgn: str
 
 
-class GameRead(BaseModel):
-    id: int
-    pgn_hash: str
-    status: str
-    analysis_error: str | None = None
-    opening_suggestion: str | None = None
-    loss_reason: str | None = None
-    training_recommendation: str | None = None
-    progress_summary: str | None = None
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 class MoveRead(BaseModel):
     id: int
     move_number: int
@@ -52,6 +38,26 @@ class MoveRead(BaseModel):
     eval_before: float | None
     eval_after: float | None
     eval_drop: float
+
+    model_config = ConfigDict(from_attributes=True)
+
+class GameRead(BaseModel):
+    id: int
+    pgn_hash: str
+    status: str
+    analysis_error: str | None = None
+    opening_suggestion: str | None = None
+    loss_reason: str | None = None
+    training_recommendation: str | None = None
+    progress_summary: str | None = None
+    game_story: str | None = None
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class GameWithMovesRead(GameRead):
+    moves: list[MoveRead] | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

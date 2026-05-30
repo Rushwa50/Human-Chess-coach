@@ -26,6 +26,7 @@ from app.schemas import (
     AnalysisRead,
     AuthRequest,
     GameRead,
+    GameWithMovesRead,
     GoogleAuthRequest,
     MistakeRead,
     PlayerProfile,
@@ -170,9 +171,14 @@ async def analyze_endpoint(
     return game
 
 
-@app.get("/games", response_model=list[GameRead])
+@app.get("/games", response_model=list[GameWithMovesRead])
 async def list_games(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)) -> list[Game]:
-    result = await db.scalars(select(Game).where(Game.user_id == user.id).order_by(Game.created_at.desc()))
+    result = await db.scalars(
+        select(Game)
+        .where(Game.user_id == user.id)
+        .options(selectinload(Game.moves))
+        .order_by(Game.created_at.desc())
+    )
     return list(result)
 
 @app.get("/profile", response_model=PlayerProfile)

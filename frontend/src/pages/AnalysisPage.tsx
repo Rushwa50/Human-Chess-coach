@@ -2,6 +2,7 @@ import { Chess } from "chess.js";
 import { ArrowRight, Brain, RefreshCw, Volume2, VolumeX, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Flame, Target } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chessboard } from "react-chessboard";
+import MomentumGraph from "../components/MomentumGraph";
 import type { Arrow, Square } from "react-chessboard/dist/chessboard/types";
 import { useParams } from "react-router-dom";
 
@@ -549,6 +550,8 @@ export default function AnalysisPage() {
         ))}
       </div>
 
+      <MomentumGraph moves={analysis.moves} mistakes={analysis.mistakes} gameStory={analysis.game.game_story || undefined} />
+
       <div className="grid gap-6 lg:grid-cols-[minmax(300px,480px)_1fr]">
         <div className="w-full flex flex-col gap-4">
           <div className="overflow-hidden rounded-2xl shadow-[0_0_30px_rgba(14,165,233,0.15)] border border-slate-700/50">
@@ -620,6 +623,33 @@ export default function AnalysisPage() {
               <span className="text-slate-400">Drag a piece, or right-click and drag an arrow to try a move</span>
             </div>
           </div>
+          {(analysis.game.training_recommendation || analysis.game.progress_summary) && (
+            <div className="rounded-2xl glass-panel p-6 shadow-lg mt-auto flex flex-col">
+              <div className="mb-6">
+                <p className="font-semibold text-lg text-coach-text tracking-wide">Game Summary & Progress</p>
+              </div>
+              <div className="grid gap-6 flex-1 content-start">
+                {analysis.game.progress_summary && (
+                  <div className="bg-coach-bg/50 p-5 rounded-xl border border-slate-700/50">
+                    <p className="font-bold text-coach-muted mb-2 tracking-wide flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-coach-accent"></span>
+                      Progress Tracking
+                    </p>
+                    <p className="text-coach-text text-[15px] leading-relaxed whitespace-pre-wrap">{analysis.game.progress_summary}</p>
+                  </div>
+                )}
+                {analysis.game.training_recommendation && (
+                  <div className="bg-coach-bg/50 p-5 rounded-xl border border-slate-700/50">
+                    <p className="font-bold text-coach-muted mb-2 tracking-wide flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-coach-success"></span>
+                      Recommended Training
+                    </p>
+                    <p className="text-coach-text text-[15px] leading-relaxed whitespace-pre-wrap">{analysis.game.training_recommendation}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid gap-4 h-full">
@@ -758,33 +788,6 @@ export default function AnalysisPage() {
               </div>
               <div className="grid gap-4 leading-relaxed text-slate-300 text-[15px]">
                 <p className="bg-emerald-900/20 p-4 rounded-xl border border-emerald-500/20 text-emerald-100 whitespace-pre-wrap">{analysis.game.opening_suggestion}</p>
-              </div>
-            </div>
-          )}
-          {(analysis.game.training_recommendation || analysis.game.progress_summary) && (
-            <div className="rounded-2xl glass-panel p-6 shadow-lg mt-0">
-              <div className="mb-6">
-                <p className="font-semibold text-lg text-coach-text tracking-wide">Game Summary & Progress</p>
-              </div>
-              <div className="grid gap-6">
-                {analysis.game.progress_summary && (
-                  <div className="bg-coach-bg/50 p-5 rounded-xl border border-slate-700/50">
-                    <p className="font-bold text-coach-muted mb-2 tracking-wide flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-coach-accent"></span>
-                      Progress Tracking
-                    </p>
-                    <p className="text-coach-text text-[15px] leading-relaxed whitespace-pre-wrap">{analysis.game.progress_summary}</p>
-                  </div>
-                )}
-                {analysis.game.training_recommendation && (
-                  <div className="bg-coach-bg/50 p-5 rounded-xl border border-slate-700/50">
-                    <p className="font-bold text-coach-muted mb-2 tracking-wide flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-coach-success"></span>
-                      Recommended Training
-                    </p>
-                    <p className="text-coach-text text-[15px] leading-relaxed whitespace-pre-wrap">{analysis.game.training_recommendation}</p>
-                  </div>
-                )}
               </div>
             </div>
           )}

@@ -351,6 +351,7 @@ async def analyze_game(game_id: int, db: AsyncSession) -> None:
                 game.loss_reason = summary_result.get("loss_reason")
                 game.training_recommendation = summary_result.get("recommended_training")
                 game.progress_summary = summary_result.get("progress_summary")
+                game.game_story = summary_result.get("game_story")
                 game.lesson_status = summary_result.get("lesson_status", "new")
                 if game.lesson_status == "repeated":
                     game.lesson_repetition = current_repetition + 1

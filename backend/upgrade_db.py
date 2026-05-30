@@ -12,6 +12,7 @@ def upgrade_db():
         ("loss_reason", "TEXT"),
         ("training_recommendation", "TEXT"),
         ("progress_summary", "TEXT"),
+        ("game_story", "TEXT"),
         ("lesson_status", "VARCHAR(32)"),
         ("lesson_repetition", "INTEGER DEFAULT 1")
     ]

@@ -32,6 +32,7 @@ class Game(Base):
     loss_reason: Mapped[str | None] = mapped_column(Text)
     training_recommendation: Mapped[str | None] = mapped_column(Text)
     progress_summary: Mapped[str | None] = mapped_column(Text)
+    game_story: Mapped[str | None] = mapped_column(Text)
     lesson_status: Mapped[str | None] = mapped_column(String(32))
     lesson_repetition: Mapped[int | None] = mapped_column(Integer, default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

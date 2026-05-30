@@ -7,9 +7,11 @@ export type Game = {
   loss_reason?: string | null;
   training_recommendation?: string | null;
   progress_summary?: string | null;
+  game_story?: string | null;
   lesson_status?: "new" | "repeated" | "mastered" | null;
   lesson_repetition?: number | null;
   created_at: string;
+  moves?: Move[];
 };
 
 export type Move = {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, History, ArrowRight, Loader2, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import MomentumGraph from "../components/MomentumGraph";
 import { useAuth } from "../state/auth";
 import { apiFetch } from "../api";
 import type { Game } from "../types";
@@ -136,6 +137,12 @@ export default function GameHistoryPage() {
                   )}
                 </div>
                 
+                {game.status === 'analyzed' && game.moves && game.moves.length > 0 && (
+                  <div className="my-4 relative z-10">
+                    <MomentumGraph compact={true} moves={game.moves} mistakes={[]} />
+                  </div>
+                )}
+
                 <div className="flex items-center gap-2 text-sm font-medium text-coach-accent group-hover:translate-x-1 transition-transform relative z-10 mt-4">
                   View Analysis <ArrowRight size={16} />
                 </div>
